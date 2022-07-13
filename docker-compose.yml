@@ -1,0 +1,61 @@
+version: '3'
+services:
+  # MySQL
+  db:
+    image: mysql:8
+    container_name: mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: banana
+      MYSQL_DATABASE: TEST_DB
+    ports:
+      - "3306:3306"
+    networks:
+      - dev_network
+
+  adminer:
+    depends_on:
+      - db
+    image: adminer:latest
+    container_name: atlas
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - 8888:8080
+    networks:
+      - dev_network
+
+  api:
+    build: 
+      context: ./api
+    volumes:
+      - "./api:/app"
+    container_name: golang-api
+    ports:
+     - "8080:3000"
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - dev_network
+  # client:
+  #   build:
+  #     context: ./client
+  #   volumes:
+  #     - "./client:/app"
+  #   container_name: react-client
+  #   ports:
+  #    - "3000:3000"
+  #   tty: true
+  #   depends_on:
+  #     - db
+  #     - api
+  #   networks:
+  #     - dev_network
+    
+networks:
+  dev_network:
+volumes:
+  db_data:
